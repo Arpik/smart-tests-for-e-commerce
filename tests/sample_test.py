@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 
-
+# Sample test
 def test_open_homepage():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
