@@ -1,0 +1,9 @@
+{
+    "base_url": "https://demo.opencart.com",
+    "browser": "chromium",
+    "headless": true,
+    "timeout": 30000,
+    "retry_attempts": 2,
+    "report_path": "reports/report.html"
+  }
+  
