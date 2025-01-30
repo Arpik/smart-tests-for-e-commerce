@@ -5,48 +5,52 @@
 4.Uses INFO level (you can change it to DEBUG).
 
 """
-
 import logging
 import os
 from datetime import datetime
 
-# Ensure logs directory exists
-log_dir = "logs"
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+# Ensure logs directory exists and create the log file name
+def check_log_directory(log_dir="logs"):
+    os.makedirs(log_dir, exist_ok=True)
+    return os.path.join(log_dir, f"test_log_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
 
-# Define log file name with timestamp
-log_file = os.path.join(log_dir, f"test_log_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
+# Create and return logger with handlers
+def setup_logger(log_dir="logs"):
 
-# Create logger instance
-logger = logging.getLogger("SmartTestsLogger")
-logger.setLevel(logging.DEBUG)
+    # Ensure directory exists and get log file path
+    log_file = check_log_directory(log_dir)
 
-# Remove existing handlers to avoid duplication
-if logger.hasHandlers():
-    logger.handlers.clear()
+    # Create logger instance and set level
+    logger = logging.getLogger("SmartTestsLogger")
+    logger.setLevel(logging.DEBUG)
 
-# File handler to capture logs to the log file
-file_handler = logging.FileHandler(log_file, mode="w", encoding="utf-8")
-file_handler.setLevel(logging.DEBUG)
+    # Create handlers
+    file_handler = logging.FileHandler(log_file, mode="w", encoding="utf-8")
+    console_handler = logging.StreamHandler()
 
-# Console handler to print logs to console
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
+    # Set level for handlers
+    file_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.INFO)
 
-# Log format definition
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-console_handler.setFormatter(formatter)
+    # Set formatter and add to handlers
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
 
-# Add both handlers to the logger
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+    # Add handlers to logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger
 
 # Add logging to pytest capture
-# This ensures pytest captures all log messages during the test run
 def pytest_configure(config):
-    logging.basicConfig(level=logging.DEBUG)
+
+    logger = setup_logger()
     pytest_log_handler = logging.StreamHandler()
     pytest_log_handler.setLevel(logging.DEBUG)
     logger.addHandler(pytest_log_handler)
+
+    logging.basicConfig(level=logging.DEBUG)
+
+logger = setup_logger()
