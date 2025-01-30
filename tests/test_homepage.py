@@ -1,7 +1,12 @@
-def test_open_homepage(browser, page):
-    # Navigate to the base URL
-    base_url = "https://demo.opencart.com"
-    page.goto(base_url)
+# Import the logger
+from utils.log_config import logger
 
-    # Assert the page title
-    assert "Your Store" in page.title()
+def test_homepage_title(page):
+    logger.info("Navigating to the homepage")  # Log before action
+    page.goto("https://demo.opencart.com")
+
+    title = page.title()
+    logger.info(f"Page title retrieved: {title}")  # Log retrieved title
+
+    assert "Your Store" in title, "Title does not match expected value"
+    logger.info("Test Passed ✅")
