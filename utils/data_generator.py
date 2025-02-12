@@ -1,4 +1,5 @@
 from faker import Faker
+from log_config import logger
 
 
 class TestDataGenerator:
@@ -24,3 +25,8 @@ class TestDataGenerator:
             "category": self.fake.random_element(elements=["Electronics", "Clothing", "Home", "Beauty", "Sports"]),
             "stock": self.fake.random_int(min=1, max=100),
         }
+
+
+user_data = TestDataGenerator().generate_user()
+product_data = TestDataGenerator().generate_product()
+logger.info(f"Generated fake user data: {user_data}, and product data: {product_data}")
