@@ -3,3 +3,6 @@ venv/
 *.pyc
 *.log
 .pytest_cache/
+
+# dotenv files
+.env
