@@ -1,5 +1,5 @@
 from faker import Faker
-from log_config import logger
+from .log_config import logger
 
 
 class TestDataGenerator:
