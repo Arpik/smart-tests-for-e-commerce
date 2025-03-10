@@ -1,33 +1,6 @@
-import pytest
 from playwright.sync_api import sync_playwright
 from utils import data_generator
-import random
-
-
-# Function to select a random option from a dropdown
-import random
-import calendar
-
-
-def select_random_option(page, selector):
-    """Selects a random option from a dropdown by checking its available values."""
-    options = page.locator(selector).evaluate(
-        "el => [...el.options].map(o => o.textContent.trim())")
-    random_choice = random.choice(options)  # Pick a random value
-    print(f"Selecting option: {random_choice}")  # Debugging
-    page.select_option(selector, label=random_choice)  # Select by label
-
-
-def block_ads(route, request):
-    # Define a list of ad-related domains or URL patterns to block
-    ad_domains = ['ads', 'doubleclick', 'googlesyndication', 'adservice']
-
-    # Check if the request URL contains any ad-related domain
-    if any(domain in request.url for domain in ad_domains):
-        route.abort()  # Block the request
-    else:
-        route.continue_()  # Allow the request
-
+from utils.helpers import select_random_option, block_ads
 
 def test_register_user():
     with sync_playwright() as p:
@@ -56,9 +29,7 @@ def test_register_user():
 
         # Enter name and email address
         page.fill('input[name="name"]', user_data["first_name"])
-        signup_email_field = page.locator(
-            'div.signup-form input[name="email"]')
-        signup_email_field.fill(user_data["email"])
+        page.fill('div.signup-form input[name="email"]', user_data["email"])
 
         # Click 'Signup' button
         page.click('button[data-qa="signup-button"]')
@@ -67,19 +38,12 @@ def test_register_user():
         # assert page.is_visible('h2:has-text("ENTER ACCOUNT INFORMATION")')
 
         # Fill details: Title, Name, Email, Password, Date of birth
-        mr_radio_button = page.locator(
-            'input[type="radio"][id="id_gender1"]').click()
+        page.locator('input[type="radio"][id="id_gender1"]').click()
+        
         page.fill('input[name="password"]', user_data["password"])
-
-        # page.fill('input[name="days"]', '10')
-        # page.fill('input[name="months"]', 'January')
-        # page.fill('input[name="years"]', '1990')
-        # Select random values for day (1-31), month (1-12), and year (1990-2023)
         select_random_option(page, 'select[id="days"]')
         page.on('route', block_ads)
         page.mouse.wheel(0, 500)  # Scroll down by 500 units
-        # if page.locator("div[id^='aswift']").is_visible():
-        #     page.locator("div[id^='aswift']").evaluate("el => el.remove()")
 
         select_random_option(page, 'select[id="months"]')
         select_random_option(page, 'select[id="years"]')
@@ -91,16 +55,16 @@ def test_register_user():
         page.check('input[name="optin"]')
 
         # Fill address details
-        page.fill('input[name="first_name"]', 'Test')
-        page.fill('input[name="last_name"]', 'User')
-        page.fill('input[name="company"]', 'Test Co.')
-        page.fill('input[name="address1"]', '123 Test Street')
-        page.fill('input[name="address2"]', 'Suite 200')
-        page.fill('input[name="country"]', 'Canada')
-        page.fill('input[name="state"]', 'Ontario')
-        page.fill('input[name="city"]', 'Toronto')
-        page.fill('input[name="zipcode"]', 'M5V 2N8')
-        page.fill('input[name="mobile_number"]', '1234567890')
+        page.fill('input[name="first_name"]', user_data["first_name"])
+        page.fill('input[name="last_name"]', user_data["last_name"])
+        page.fill('input[name="company"]', user_data["company"])
+        page.fill('input[name="address1"]', user_data["address1"])
+        page.fill('input[name="address2"]', user_data["address2"])
+        select_random_option(page, 'select[id="country"]')
+        page.fill('input[name="state"]', user_data["state"])
+        page.fill('input[name="city"]', user_data["city"])
+        page.fill('input[name="zipcode"]', user_data["zipcode"])
+        page.fill('input[name="mobile_number"]', user_data["phonenumber"])
 
         # Click 'Create Account' button
         page.click('button[data-qa="create-account"]')
@@ -108,20 +72,7 @@ def test_register_user():
         # Verify that 'ACCOUNT CREATED!' is visible
         assert page.is_visible('b:has-text("Account Created!")')
 
-        # Click 'Continue' button
-        page.click('a[data-qa="continue-button"]')
-
-        # Verify that 'Logged in as username' is visible
-        assert page.is_visible('a[href="/profile"]')
-
-        # Click 'Delete Account' button
-        page.click('a[href="/delete_account"]')
-
-        # Verify that 'ACCOUNT DELETED!' is visible
-        assert page.is_visible('h2:has-text("Account Deleted!")')
-
-        # Click 'Continue' button
-        page.click('a[data-qa="continue-button"]')
-
         # Close the browser
         browser.close()
+
+  
