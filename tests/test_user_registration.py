@@ -5,19 +5,29 @@ import random
 
 
 # Function to select a random option from a dropdown
-def select_random_option(page, selector, min_value, max_value):
-    random_value = str(random.randint(min_value, max_value))  # Generate a random number within the range
-    page.select_option(selector, label=random_value)  # Select the random value
+import random
+import calendar
+
+
+def select_random_option(page, selector):
+    """Selects a random option from a dropdown by checking its available values."""
+    options = page.locator(selector).evaluate(
+        "el => [...el.options].map(o => o.textContent.trim())")
+    random_choice = random.choice(options)  # Pick a random value
+    print(f"Selecting option: {random_choice}")  # Debugging
+    page.select_option(selector, label=random_choice)  # Select by label
+
 
 def block_ads(route, request):
     # Define a list of ad-related domains or URL patterns to block
     ad_domains = ['ads', 'doubleclick', 'googlesyndication', 'adservice']
-    
+
     # Check if the request URL contains any ad-related domain
     if any(domain in request.url for domain in ad_domains):
         route.abort()  # Block the request
     else:
         route.continue_()  # Allow the request
+
 
 def test_register_user():
     with sync_playwright() as p:
@@ -25,7 +35,7 @@ def test_register_user():
         # Change headless to True for headless mode
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
-        
+
         test_data_generator = data_generator.TestDataGenerator()
         user_data = test_data_generator.generate_user()
 
@@ -46,30 +56,34 @@ def test_register_user():
 
         # Enter name and email address
         page.fill('input[name="name"]', user_data["first_name"])
-        signup_email_field = page.locator('div.signup-form input[name="email"]')
+        signup_email_field = page.locator(
+            'div.signup-form input[name="email"]')
         signup_email_field.fill(user_data["email"])
 
         # Click 'Signup' button
         page.click('button[data-qa="signup-button"]')
 
         # Verify that 'ENTER ACCOUNT INFORMATION' is visible
-        #assert page.is_visible('h2:has-text("ENTER ACCOUNT INFORMATION")')
+        # assert page.is_visible('h2:has-text("ENTER ACCOUNT INFORMATION")')
 
         # Fill details: Title, Name, Email, Password, Date of birth
-        mr_radio_button = page.locator('input[type="radio"][id="id_gender1"]').click()
+        mr_radio_button = page.locator(
+            'input[type="radio"][id="id_gender1"]').click()
         page.fill('input[name="password"]', user_data["password"])
 
         # page.fill('input[name="days"]', '10')
         # page.fill('input[name="months"]', 'January')
         # page.fill('input[name="years"]', '1990')
-            # Select random values for day (1-31), month (1-12), and year (1990-2023)
-        select_random_option(page, 'select[id="days"]', 1, 31)
+        # Select random values for day (1-31), month (1-12), and year (1990-2023)
+        select_random_option(page, 'select[id="days"]')
         page.on('route', block_ads)
-        # Listen for alerts and dismiss them automatically
-        page.on('popup', lambda popup: popup.close())
-        select_random_option(page, 'select[id="months"]', 1, 12)
-        select_random_option(page, 'select[id="years"]', 190, 2023)
-        
+        page.mouse.wheel(0, 500)  # Scroll down by 500 units
+        # if page.locator("div[id^='aswift']").is_visible():
+        #     page.locator("div[id^='aswift']").evaluate("el => el.remove()")
+
+        select_random_option(page, 'select[id="months"]')
+        select_random_option(page, 'select[id="years"]')
+
         # Select checkbox 'Sign up for our newsletter!'
         page.check('input[name="newsletter"]')
 
