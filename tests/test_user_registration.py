@@ -10,7 +10,7 @@ def test_register_user():
         page = browser.new_page()
 
         test_data_generator = data_generator.TestDataGenerator()
-        user_data = test_data_generator.generate_user()
+        user_data = test_data_generator.generate_ai_user()
 
         print(user_data)
 
